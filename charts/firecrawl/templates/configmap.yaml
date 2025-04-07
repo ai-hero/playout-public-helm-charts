@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-config
+data:
+  NUM_WORKERS_PER_QUEUE: "{{ .Values.firecrawl_api.configs.numWorkersPerQueue }}"
+  PORT: "{{ .Values.firecrawl_api.configs.port }}"
+  HOST: "{{ .Values.firecrawl_api.configs.host }}"
+  REDIS_URL: "{{ .Values.firecrawl_api.configs.redisUrl }}"
+  REDIS_RATE_LIMIT_URL: "{{ .Values.firecrawl_api.configs.redisRateLimitUrl }}"
+  PLAYWRIGHT_MICROSERVICE_URL: "{{ .Values.firecrawl_api.configs.playwrightMicroserviceUrl }}"
+  USE_DB_AUTHENTICATION: "{{ .Values.firecrawl_api.configs.useDbAuthentication }}"
+  HDX_NODE_BETA_MODE: "{{ .Values.firecrawl_api.configs.hdxNodeBetaMode }}"

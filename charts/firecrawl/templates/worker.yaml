@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: firecrawl-worker
+  template:
+    metadata:
+      labels:
+        app: firecrawl-worker
+    spec:
+      containers:
+        - name: worker
+          image: "{{ .Values.firecrawl_worker.image.repository }}:{{ .Values.firecrawl_worker.image.tag }}"
+          imagePullPolicy: {{ .Values.firecrawl_worker.image.pullPolicy }}
+          imagePullPolicy: Always
+          args: [ "pnpm", "run", "workers" ]
+          env:
+            - name: FLY_PROCESS_GROUP
+              value: "worker"
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-config
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ .Release.Name }}-worker
+  labels:
+    app: firecrawl-api
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ .Release.Name }}-worker
+  minReplicas: {{ .Values.firecrawl_worker.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.firecrawl_worker.autoscaling.maxReplicas }}
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 90
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 90

@@ -1,0 +1,71 @@
+firecrawl_api:
+  image:
+    repository: ghcr.io/dsdatsme/firecrawl
+    pullPolicy: IfNotPresent
+    tag: "v1"
+  service:
+    port: 3002
+  configs:
+    numWorkersPerQueue: "8"
+    port: "3002"
+    host: "0.0.0.0"
+    redisUrl: "redis://@firecrawl-redis:6379"
+    redisRateLimitUrl: "redis://firecrawl-redis:6379"
+    playwrightMicroserviceUrl: "http://firecrawl-playwright-service:3000"
+    useDbAuthentication: "false"
+    hdxNodeBetaMode: "1"
+  # secrets:
+  #   openaiApiKey: ""
+  #   slackWebhookUrl: ""
+  #   llamaparseApiKey: ""
+  #   bullAuthKey: ""
+  #   testApiKey: ""
+  #   posthogApiKey: ""
+  #   posthogHost: ""
+  #   scrapingBeeApiKey: ""
+  #   stripePriceIdStandard: ""
+  #   stripePriceIdScale: ""
+  #   fireEngineBetaUrl: ""
+  #   redisPassword: ""
+  autoscaling:
+    minReplicas: 1
+    maxReplicas: 1
+
+playwright_service:
+  image:
+    repository: ghcr.io/dsdatsme/firecrawl-playwright
+    pullPolicy: IfNotPresent
+    tag: "v1"
+  service:
+    port: 3000
+  autoscaling:
+    minReplicas: 1
+    maxReplicas: 1
+
+redis:
+  image:
+    repository: redis
+    pullPolicy: IfNotPresent
+    tag: "alpine"
+  service:
+    port: 6379
+  password: ""
+
+firecrawl_worker:
+  image:
+    repository: ghcr.io/dsdatsme/firecrawl
+    pullPolicy: IfNotPresent
+    tag: "v1"
+  autoscaling:
+    minReplicas: 1
+    maxReplicas: 1
+
+ingress:
+  className: "nginx-public"
+  annotations:
+    kubernetes.io/ingress.class: nginx-public
+    cert-manager.io/cluster-issuer: letsencrypt-cert
+    cert-manager.io/common-name: app3.elevate.do
+    nginx.ingress.kubernetes.io/backend-protocol: HTTP
+  host: app3.elevate.do
+  secretName: letsencrypt-cert
